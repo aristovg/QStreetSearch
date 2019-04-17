@@ -22,6 +22,8 @@ namespace QStreetSearch.Parser
             {
                 csv.Configuration.Delimiter = "\t";
                 csv.Configuration.BadDataFound = null;
+                csv.Configuration.HeaderValidated = null;
+                csv.Configuration.MissingFieldFound = null;
                 var geoObjects = csv.GetRecords<OsmGeoObject>().SelectMany(_ => languages, (street, lang) => Parsers[lang](street));
 
                 return geoObjects.Select(x => new GeoObject(x)).ToList();

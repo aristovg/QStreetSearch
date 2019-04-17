@@ -21,14 +21,22 @@ namespace QStreetSearch
 
         private const int DefaultItemsCount = 100;
 
-        private Lazy<AnagramDistanceSearch<Street>> _anagramDistanceSearch;
-        private Lazy<SimpleContainsSearch<Street>> _containsSearch;
-        private Lazy<DistanceSearch<Street>> _distanceSearch;
-        private Lazy<PatternSearch<Street>> _patternSearch;
+        private Lazy<AnagramDistanceSearch<GeoObject>> _anagramDistanceSearch;
+        private Lazy<SimpleContainsSearch<GeoObject>> _containsSearch;
+        private Lazy<DistanceSearch<GeoObject>> _distanceSearch;
+        private Lazy<PatternSearch<GeoObject>> _patternSearch;
 
-        private Dictionary<string, Func<string, IEnumerable<SearchResult<Street>>>> _searchStrategies;
+        private Dictionary<string, Func<string, IEnumerable<SearchResult<GeoObject>>>> _searchStrategies;
+        private Dictionary<string, Func<List<GeoObject>>> _dataSetsFetchers;
 
-        private Func<string, IEnumerable<SearchResult<Street>>> _selectedSearchStrategy;
+        private Func<string, IEnumerable<SearchResult<GeoObject>>> _selectedSearchStrategy;
+        private List<GeoObject> _workingDataSet;
+
+        private readonly ComparisonKeySelector<GeoObject>[] _comparisonKeys = new[]
+        {
+            new ComparisonKeySelector<GeoObject>(CurrentNameKey, x => x.Name),
+            new ComparisonKeySelector<GeoObject>(OldNameKey, x => x.OldName)
+        };
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -37,24 +45,53 @@ namespace QStreetSearch
             Window.RequestFeature(WindowFeatures.NoTitle);
             SetContentView(Resource.Layout.activity_main);
 
+            InitializeDataSetFetchers();
+
             InitializeSearchStrategies();
 
-            var streetStream = Assets.Open("kiev-streets.csv");
-            var parsedStreets = StreetParser.Parse(streetStream, Language.Ru).ToList();
+            InitializeSearchAlgorithms();
 
-            var comparisonKeys = new[]
-            {
-                new ComparisonKeySelector<Street>(CurrentNameKey, x => x.Name),
-                new ComparisonKeySelector<Street>(OldNameKey, x => x.OldName)
-            };
-
-            _anagramDistanceSearch = new Lazy<AnagramDistanceSearch<Street>>(() => new AnagramDistanceSearch<Street>(parsedStreets, comparisonKeys));
-            _containsSearch = new Lazy<SimpleContainsSearch<Street>>(() => new SimpleContainsSearch<Street>(parsedStreets, comparisonKeys));
-            _distanceSearch = new Lazy<DistanceSearch<Street>>(() => new DistanceSearch<Street>(parsedStreets, comparisonKeys));
-            _patternSearch = new Lazy<PatternSearch<Street>>(() => new PatternSearch<Street>(parsedStreets, comparisonKeys));
-
+            SetupDataSetSpinner();
             SetupSearchMethodSpinner();
             SetupSearchEditText();
+        }
+
+        private void InitializeSearchAlgorithms()
+        {
+            _anagramDistanceSearch = new Lazy<AnagramDistanceSearch<GeoObject>>(() => new AnagramDistanceSearch<GeoObject>(_workingDataSet, _comparisonKeys));
+            _containsSearch = new Lazy<SimpleContainsSearch<GeoObject>>(() => new SimpleContainsSearch<GeoObject>(_workingDataSet, _comparisonKeys));
+            _distanceSearch = new Lazy<DistanceSearch<GeoObject>>(() => new DistanceSearch<GeoObject>(_workingDataSet, _comparisonKeys));
+            _patternSearch = new Lazy<PatternSearch<GeoObject>>(() => new PatternSearch<GeoObject>(_workingDataSet, _comparisonKeys));
+        }
+
+        private void InitializeDataSetFetchers()
+        {
+            _dataSetsFetchers = new Dictionary<string, Func<List<GeoObject>>>()
+            {
+                [Resources.GetString(Resource.String.dataset_kyiv_region_ru)] = () => DataSetFetcher("kiev-streets.csv", Language.Ru),
+                [Resources.GetString(Resource.String.dataset_kyiv_region_ua)] = () => DataSetFetcher("kiev-streets.csv", Language.Ua),
+                [Resources.GetString(Resource.String.dataset_kyiv_region_ru_ua)] = () => DataSetFetcher("kiev-streets.csv", Language.Ru, Language.Ua),
+                [Resources.GetString(Resource.String.dataset_kyiv_street_ru)] = () => DataSetFetcher("kiev-streets.csv", Language.Ru),
+                [Resources.GetString(Resource.String.dataset_kyiv_street_ua)] = () => DataSetFetcher("kiev-streets.csv", Language.Ua),
+                [Resources.GetString(Resource.String.dataset_kyiv_street_ru_ua)] = () => DataSetFetcher("kiev-streets.csv", Language.Ru, Language.Ua),
+            };
+
+            List<GeoObject> DataSetFetcher(string assetName, params Language[] languages)
+            {
+                var streetStream = Assets.Open(assetName);
+                return GeoObjectParser.Parse(streetStream, languages).ToList();
+            }
+        }
+
+        private void InitializeSearchStrategies()
+        {
+            _searchStrategies = new Dictionary<string, Func<string, IEnumerable<SearchResult<GeoObject>>>>()
+            {
+                [Resources.GetString(Resource.String.method_contains)] = s => _containsSearch.Value.FindByContainsSequence(s),
+                [Resources.GetString(Resource.String.method_anagramdistance)] = s => _anagramDistanceSearch.Value.FindByDistance(s),
+                [Resources.GetString(Resource.String.method_distance)] = s => _distanceSearch.Value.FindByDistance(s),
+                [Resources.GetString(Resource.String.method_pattern)] = s => _patternSearch.Value.FindByPattern(s)
+            };
         }
 
         private void SetupSearchEditText()
@@ -95,18 +132,25 @@ namespace QStreetSearch
             spinner.Adapter = adapter;
         }
 
-        private void InitializeSearchStrategies()
+        private void SetupDataSetSpinner()
         {
-            _searchStrategies = new Dictionary<string, Func<string, IEnumerable<SearchResult<Street>>>>()
+            Spinner spinner = FindViewById<Spinner>(Resource.Id.spinnerDataSet);
+            spinner.ItemSelected += (sender, args) =>
             {
-                [Resources.GetString(Resource.String.method_contains)] = s => _containsSearch.Value.FindByContainsSequence(s),
-                [Resources.GetString(Resource.String.method_anagramdistance)] = s => _anagramDistanceSearch.Value.FindByDistance(s),
-                [Resources.GetString(Resource.String.method_distance)] = s => _distanceSearch.Value.FindByDistance(s),
-                [Resources.GetString(Resource.String.method_pattern)] = s => _patternSearch.Value.FindByPattern(s)
+                var item = (string)spinner.GetItemAtPosition(args.Position);
+                var fetcher = _dataSetsFetchers[item];
+                _workingDataSet = fetcher();
+                InitializeSearchAlgorithms();
             };
+
+            var adapter = ArrayAdapter.CreateFromResource(
+                this, Resource.Array.dataset_array, Android.Resource.Layout.SimpleSpinnerItem);
+
+            adapter.SetDropDownViewResource(Android.Resource.Layout.SimpleSpinnerDropDownItem);
+            spinner.Adapter = adapter;
         }
 
-        private static string FormatListViewItem(SearchResult<Street> searchResult)
+        private static string FormatListViewItem(SearchResult<GeoObject> searchResult)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -116,7 +160,7 @@ namespace QStreetSearch
                 ? $" [{searchResult.Item.Type}]"
                 : $" [{searchResult.Item.Type}, {searchResult.Item.Suburb}]");
 
-            var distanceSearch = searchResult as DistanceSearchResult<Street>;
+            var distanceSearch = searchResult as DistanceSearchResult<GeoObject>;
 
             if (distanceSearch != null && searchResult.KeyId == CurrentNameKey)
             {

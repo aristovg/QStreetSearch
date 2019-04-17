@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace QStreetSearch.Parser
 {
-    public class Street
+    public class GeoObject
     {
         public string Name { get; }
         public string OldName { get; }
@@ -20,21 +20,21 @@ namespace QStreetSearch.Parser
 
         private readonly KnownStreetTypes _knownStreetTypes;
 
-        internal Street(LocalizedOsmStreet street)
+        internal GeoObject(LocalizedOsmGeoObject geoObject)
         {
-            if (!TypesByLanguage.TryGetValue(street.Language, out _knownStreetTypes))
+            if (!TypesByLanguage.TryGetValue(geoObject.Language, out _knownStreetTypes))
             {
-                throw new InvalidOperationException($"Unknown language {street.Language.ToString()}");
+                throw new InvalidOperationException($"Unknown language {geoObject.Language.ToString()}");
             }
 
-            (Name, Type) = TrimStreetType(street.FullName);
+            (Name, Type) = TrimStreetType(geoObject.FullName);
 
-            if (!string.IsNullOrWhiteSpace(street.FullOldName))
+            if (!string.IsNullOrWhiteSpace(geoObject.FullOldName))
             {
-                (OldName, OldType) = TrimStreetType(street.FullOldName);
+                (OldName, OldType) = TrimStreetType(geoObject.FullOldName);
             }
 
-            Suburb = street.Suburb;
+            Suburb = geoObject.Suburb;
         }
 
 

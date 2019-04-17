@@ -18,9 +18,9 @@ namespace QStreetSearch.Parser.Tests
         [InlineData("непонятная тропа", "непонятная тропа", null)]
         public void ParsesRuStreetName(string fullStreetName, string expectedName, string expectedType)
         {
-            var localizedOsm = new LocalizedOsmStreet(Language.Ru, fullStreetName);
+            var localizedOsm = new LocalizedOsmGeoObject(Language.Ru, fullStreetName);
 
-            var street  = new Street(localizedOsm);
+            var street  = new GeoObject(localizedOsm);
             
             Assert.Equal(expectedName, street.Name);
             Assert.Equal(expectedType, street.Type);
@@ -40,9 +40,9 @@ namespace QStreetSearch.Parser.Tests
         [InlineData("непонятная тропа", "непонятная тропа", null)]
         public void ParsesRuOldStreetName(string fullStreetName, string expectedName, string expectedType)
         {
-            var localizedOsm = new LocalizedOsmStreet(Language.Ru, fullStreetName, fullStreetName);
+            var localizedOsm = new LocalizedOsmGeoObject(Language.Ru, fullStreetName, fullStreetName);
 
-            var street = new Street(localizedOsm);
+            var street = new GeoObject(localizedOsm);
 
             Assert.Equal(expectedName, street.OldName);
             Assert.Equal(expectedType, street.OldType);

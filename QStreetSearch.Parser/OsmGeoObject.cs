@@ -1,6 +1,6 @@
 ﻿namespace QStreetSearch.Parser
 {
-    internal class OsmStreet
+    internal class OsmGeoObject
     {
         public string NameUa { get; set; }
         public string NameRu { get; set; }

@@ -2,14 +2,14 @@
 
 namespace QStreetSearch.Parser
 {
-    internal class LocalizedOsmStreet
+    internal class LocalizedOsmGeoObject
     {
         public string FullName { get; }
         public string FullOldName { get; }
         public string Suburb { get; }
         public Language Language { get; }
 
-        public LocalizedOsmStreet(Language language, string fullName, string fullOldName = null, string suburb = null)
+        public LocalizedOsmGeoObject(Language language, string fullName, string fullOldName = null, string suburb = null)
         {
             FullName = fullName.ToLower();
             FullOldName = fullOldName?.ToLower();
@@ -17,9 +17,9 @@ namespace QStreetSearch.Parser
             Language = language;
         }
 
-        private sealed class FullNameFullOldNameSuburbEqualityComparer : IEqualityComparer<LocalizedOsmStreet>
+        private sealed class FullNameFullOldNameSuburbEqualityComparer : IEqualityComparer<LocalizedOsmGeoObject>
         {
-            public bool Equals(LocalizedOsmStreet x, LocalizedOsmStreet y)
+            public bool Equals(LocalizedOsmGeoObject x, LocalizedOsmGeoObject y)
             {
                 if (ReferenceEquals(x, y)) return true;
                 if (ReferenceEquals(x, null)) return false;
@@ -28,7 +28,7 @@ namespace QStreetSearch.Parser
                 return string.Equals(x.FullName, y.FullName) && string.Equals(x.FullOldName, y.FullOldName) && string.Equals(x.Suburb, y.Suburb);
             }
 
-            public int GetHashCode(LocalizedOsmStreet obj)
+            public int GetHashCode(LocalizedOsmGeoObject obj)
             {
                 unchecked
                 {
@@ -40,6 +40,6 @@ namespace QStreetSearch.Parser
             }
         }
 
-        public static IEqualityComparer<LocalizedOsmStreet> FullNameFullOldNameSuburbComparer { get; } = new FullNameFullOldNameSuburbEqualityComparer();
+        public static IEqualityComparer<LocalizedOsmGeoObject> FullNameFullOldNameSuburbComparer { get; } = new FullNameFullOldNameSuburbEqualityComparer();
     }
 }

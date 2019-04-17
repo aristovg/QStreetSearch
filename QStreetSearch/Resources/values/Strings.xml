@@ -1,4 +1,15 @@
 <resources>
-    <string name="app_name">QStreetSearch</string>
-    <string name="action_settings">Settings</string>
+  <string name="app_name">QStreetSearch</string>
+  <string name="action_settings">Settings</string>
+
+  <string name="method_prompt">Search method</string>
+  <string name="method_contains">Contains</string>
+  <string name="method_pattern">Pattern</string>
+  <string name="method_anagram">Anagram + Word Distance</string>
+
+  <string-array name="search_methods_array">
+    <item>@string/method_contains</item>
+    <item>@string/method_pattern</item>
+    <item>@string/method_anagram</item>
+  </string-array>
 </resources>

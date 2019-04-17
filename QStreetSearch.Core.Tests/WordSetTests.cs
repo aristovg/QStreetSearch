@@ -4,11 +4,11 @@ namespace QStreetSearch.Search.Tests
 {
     public class WordSetTests
     {
-        private readonly WordSet<string> _wordSet;
+        private readonly AnagramDistanceSearch<string> _anagramDistanceSearch;
 
         public WordSetTests()
         {
-            _wordSet = new WordSet<string>(new[] {"kyiv", "kharkiv", "odessa", "krakiv"}, x => x);
+            _anagramDistanceSearch = new AnagramDistanceSearch<string>(new[] {"kyiv", "kharkiv", "odessa", "krakiv"}, new ComparisonKeySelector<string>("Default", x => x));
         }
 
         [Theory]
@@ -18,19 +18,18 @@ namespace QStreetSearch.Search.Tests
         [InlineData("viyk", "kyiv")]
         [InlineData("odessa", "odessa")]
         [InlineData("ssaode", "odessa")]
-        public void ShouldFindAnagram(string anagram, string expected)
+        public void ShouldFindExactAnagramWithZeroDistance(string anagram, string expected)
         {
-            bool result = _wordSet.TryFindExact(anagram, out var words);
+            var result = _anagramDistanceSearch.FindByDistance(anagram);
 
-            Assert.True(result);
-            Assert.Single(words);
-            Assert.Equal(expected, words[0]);
+            Assert.Equal(0, result[0].Distance);
+            Assert.Equal(expected, result[0].Item);
         }
 
         [Fact]
         public void ShouldReturnOrderedWordsForEmptyString()
         {
-            var result = _wordSet.FindByDistance("");
+            var result = _anagramDistanceSearch.FindByDistance("");
 
             Assert.Equal(4, result.Count);
             Assert.Equal("kyiv", result[0].Item);
@@ -40,7 +39,7 @@ namespace QStreetSearch.Search.Tests
         [Fact]
         public void ShouldReturnOrderedWords()
         {
-            var result = _wordSet.FindByDistance("kraiv");
+            var result = _anagramDistanceSearch.FindByDistance("kraiv");
 
             Assert.Equal(4, result.Count);
             Assert.Equal("krakiv", result[0].Item);

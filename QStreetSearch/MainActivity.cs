@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Android.App;
 using Android.OS;
 using Android.Support.V7.App;
@@ -13,45 +16,111 @@ namespace QStreetSearch
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
-        private WordSet<Street> _wordSet;
+        private const string CurrentNameKey = "Current";
+        private const string OldNameKey = "Old";
+
+        private const int DefaultItemsCount = 100;
+
+        private AnagramDistanceSearch<Street> _anagramDistanceSearch;
+        private SimpleContainsSearch<Street> _containsSearch;
+
+        private Dictionary<string, Func<string, IEnumerable<SearchResult<Street>>>> _searchStrategies;
+
+        private Func<string, IEnumerable<SearchResult<Street>>> _selectedSearchStrategy;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+
             Window.RequestFeature(WindowFeatures.NoTitle);
             SetContentView(Resource.Layout.activity_main);
+
+            InitializeSearchStrategies();
 
             var streetStream = Assets.Open("kiev-streets.csv");
             var parsedStreets = StreetParser.Parse(streetStream, Language.Ru).ToList();
 
-            _wordSet = new WordSet<Street>(parsedStreets, x => x.Name);
+            var comparisonKeys = new[]
+            {
+                new ComparisonKeySelector<Street>(CurrentNameKey, x => x.Name),
+                new ComparisonKeySelector<Street>(OldNameKey, x => x.OldName)
+            };
+
+            _anagramDistanceSearch = new AnagramDistanceSearch<Street>(parsedStreets, comparisonKeys);
+            _containsSearch = new SimpleContainsSearch<Street>(parsedStreets, comparisonKeys);
+
+            Spinner spinner = FindViewById<Spinner>(Resource.Id.spinnerSearchMethod);
+            spinner.ItemSelected += (sender, args) =>
+            {
+                var item = (string) spinner.GetItemAtPosition(args.Position);
+                _selectedSearchStrategy = _searchStrategies[item];
+            };
+            var adapter = ArrayAdapter.CreateFromResource(
+                this, Resource.Array.search_methods_array, Android.Resource.Layout.SimpleSpinnerItem);
+
+            adapter.SetDropDownViewResource(Android.Resource.Layout.SimpleSpinnerDropDownItem);
+            spinner.Adapter = adapter;
 
 
-            EditText edittext = FindViewById<EditText>(Resource.Id.edittext);
-            edittext.EditorAction += (sender, e) => {
+            EditText editTextQuery = FindViewById<EditText>(Resource.Id.editTextQuery);
+            editTextQuery.EditorAction += (sender, e) => {
                 e.Handled = false;
 
                 if (e.ActionId == ImeAction.Done)
                 {
-                    
-                    {
-                        Toast.MakeText(this, edittext.Text, ToastLength.Short).Show();
-                        e.Handled = true;
-                    }
-
-                    string text = edittext.Text;
+                    string text = editTextQuery.Text;
 
                     string cleared = new string(text.Where(char.IsLetterOrDigit).ToArray());
 
-                    var streetsByWordDistance = _wordSet.FindByDistance(cleared).Take(20).Select(x => $"{x.Item.Name} [{x.Item.Type}]").ToList();
+                    var results = _selectedSearchStrategy(cleared).Take(DefaultItemsCount).Select(FormatListViewItem).ToList();
 
-                    ListView lw = FindViewById<ListView>(Resource.Id.listviewf);
-                    lw.Adapter = new ArrayAdapter(this, Android.Resource.Layout.SimpleListItem1, streetsByWordDistance);
-                    edittext.ClearFocus();
+                    ListView listView = FindViewById<ListView>(Resource.Id.listViewResults);
+                    listView.Adapter = new ArrayAdapter(this, Android.Resource.Layout.SimpleListItem1, results);
+
+                    e.Handled = true;
                 }
             };
+        }
 
+        private void InitializeSearchStrategies()
+        {
+            _searchStrategies = new Dictionary<string, Func<string, IEnumerable<SearchResult<Street>>>>()
+            {
+                [Resources.GetString(Resource.String.method_contains)] = s => _containsSearch.FindByContainsSequence(s),
+                [Resources.GetString(Resource.String.method_anagram)] = s => _anagramDistanceSearch.FindByDistance(s),
+                [Resources.GetString(Resource.String.method_pattern)] = s => _containsSearch.FindByContainsSequence(s),
+            };
+        }
 
+        private static string FormatListViewItem(SearchResult<Street> searchResult)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(searchResult.Item.Name);
+
+            sb.Append(string.IsNullOrEmpty(searchResult.Item.Suburb)
+                ? $" [{searchResult.Item.Type}]"
+                : $" [{searchResult.Item.Type}, {searchResult.Item.Suburb}]");
+
+            var distanceSearch = searchResult as DistanceSearchResult<Street>;
+
+            if (distanceSearch != null && searchResult.KeyId == CurrentNameKey)
+            {
+                sb.Append($" (word dist: {distanceSearch.Distance})");
+            }
+
+            if (!string.IsNullOrEmpty(searchResult.Item.OldName))
+            {
+                sb.Append(System.Environment.NewLine);
+                sb.Append($"Old: {searchResult.Item.OldName} [{searchResult.Item.OldType}]");
+
+                if (distanceSearch != null && searchResult.KeyId == OldNameKey)
+                {
+                    sb.Append($" (word dist: {distanceSearch.Distance})");
+                }
+            }
+
+            return sb.ToString();
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)

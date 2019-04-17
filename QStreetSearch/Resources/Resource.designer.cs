@@ -3279,10 +3279,13 @@ namespace QStreetSearch
 			public const int character_counter_pattern = 2131296288;
 			
 			// aapt resource value: 0x7f09002c
-			public const int method_anagram = 2131296300;
+			public const int method_anagramdistance = 2131296300;
 			
 			// aapt resource value: 0x7f09002a
 			public const int method_contains = 2131296298;
+			
+			// aapt resource value: 0x7f09002d
+			public const int method_distance = 2131296301;
 			
 			// aapt resource value: 0x7f09002b
 			public const int method_pattern = 2131296299;

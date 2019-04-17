@@ -21,8 +21,9 @@ namespace QStreetSearch
 
         private const int DefaultItemsCount = 100;
 
-        private AnagramDistanceSearch<Street> _anagramDistanceSearch;
-        private SimpleContainsSearch<Street> _containsSearch;
+        private Lazy<AnagramDistanceSearch<Street>> _anagramDistanceSearch;
+        private Lazy<SimpleContainsSearch<Street>> _containsSearch;
+        private Lazy<DistanceSearch<Street>> _distanceSearch;
 
         private Dictionary<string, Func<string, IEnumerable<SearchResult<Street>>>> _searchStrategies;
 
@@ -46,24 +47,19 @@ namespace QStreetSearch
                 new ComparisonKeySelector<Street>(OldNameKey, x => x.OldName)
             };
 
-            _anagramDistanceSearch = new AnagramDistanceSearch<Street>(parsedStreets, comparisonKeys);
-            _containsSearch = new SimpleContainsSearch<Street>(parsedStreets, comparisonKeys);
+            _anagramDistanceSearch = new Lazy<AnagramDistanceSearch<Street>>(() => new AnagramDistanceSearch<Street>(parsedStreets, comparisonKeys));
+            _containsSearch = new Lazy<SimpleContainsSearch<Street>>(() => new SimpleContainsSearch<Street>(parsedStreets, comparisonKeys));
+            _distanceSearch = new Lazy<DistanceSearch<Street>>(() => new DistanceSearch<Street>(parsedStreets, comparisonKeys));
 
-            Spinner spinner = FindViewById<Spinner>(Resource.Id.spinnerSearchMethod);
-            spinner.ItemSelected += (sender, args) =>
-            {
-                var item = (string) spinner.GetItemAtPosition(args.Position);
-                _selectedSearchStrategy = _searchStrategies[item];
-            };
-            var adapter = ArrayAdapter.CreateFromResource(
-                this, Resource.Array.search_methods_array, Android.Resource.Layout.SimpleSpinnerItem);
+            SetupSearchMethodSpinner();
+            SetupSearchEditText();
+        }
 
-            adapter.SetDropDownViewResource(Android.Resource.Layout.SimpleSpinnerDropDownItem);
-            spinner.Adapter = adapter;
-
-
+        private void SetupSearchEditText()
+        {
             EditText editTextQuery = FindViewById<EditText>(Resource.Id.editTextQuery);
-            editTextQuery.EditorAction += (sender, e) => {
+            editTextQuery.EditorAction += (sender, e) =>
+            {
                 e.Handled = false;
 
                 if (e.ActionId == ImeAction.Done)
@@ -82,13 +78,29 @@ namespace QStreetSearch
             };
         }
 
+        private void SetupSearchMethodSpinner()
+        {
+            Spinner spinner = FindViewById<Spinner>(Resource.Id.spinnerSearchMethod);
+            spinner.ItemSelected += (sender, args) =>
+            {
+                var item = (string) spinner.GetItemAtPosition(args.Position);
+                _selectedSearchStrategy = _searchStrategies[item];
+            };
+            var adapter = ArrayAdapter.CreateFromResource(
+                this, Resource.Array.search_methods_array, Android.Resource.Layout.SimpleSpinnerItem);
+
+            adapter.SetDropDownViewResource(Android.Resource.Layout.SimpleSpinnerDropDownItem);
+            spinner.Adapter = adapter;
+        }
+
         private void InitializeSearchStrategies()
         {
             _searchStrategies = new Dictionary<string, Func<string, IEnumerable<SearchResult<Street>>>>()
             {
-                [Resources.GetString(Resource.String.method_contains)] = s => _containsSearch.FindByContainsSequence(s),
-                [Resources.GetString(Resource.String.method_anagram)] = s => _anagramDistanceSearch.FindByDistance(s),
-                [Resources.GetString(Resource.String.method_pattern)] = s => _containsSearch.FindByContainsSequence(s),
+                [Resources.GetString(Resource.String.method_contains)] = s => _containsSearch.Value.FindByContainsSequence(s),
+                [Resources.GetString(Resource.String.method_anagramdistance)] = s => _anagramDistanceSearch.Value.FindByDistance(s),
+                [Resources.GetString(Resource.String.method_distance)] = s => _distanceSearch.Value.FindByDistance(s),
+                [Resources.GetString(Resource.String.method_pattern)] = s => _containsSearch.Value.FindByContainsSequence(s),
             };
         }
 

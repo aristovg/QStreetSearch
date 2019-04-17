@@ -10,8 +10,8 @@
     <TemplateGuid>{84dd83c5-0fe3-4294-9419-09e7c8ba324f}</TemplateGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AnagramHelper</RootNamespace>
-    <AssemblyName>AnagramHelper</AssemblyName>
+    <RootNamespace>QStreetSearch</RootNamespace>
+    <AssemblyName>QStreetSearch</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <AndroidApplication>True</AndroidApplication>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
@@ -35,6 +35,9 @@
     <AndroidUseSharedRuntime>True</AndroidUseSharedRuntime>
     <AndroidLinkMode>None</AndroidLinkMode>
     <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
+    <AotAssemblies>false</AotAssemblies>
+    <EnableLLVM>false</EnableLLVM>
+    <BundleAssemblies>false</BundleAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>PdbOnly</DebugType>
@@ -62,7 +65,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
-    <None Include="Properties\AndroidManifest.xml" />
+    <None Include="Properties\AndroidManifest.xml">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Assets\AboutAssets.txt" />
     <AndroidAsset Include="Assets\kiev-streets.csv" />
   </ItemGroup>
@@ -106,18 +111,16 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AnagramHelper.Core\AnagramHelper.Search.csproj">
+    <ProjectReference Include="..\QStreetSearch.Core\QStreetSearch.Search.csproj">
       <Project>{C5151B6B-B03A-44B1-A829-6BE4CC60A86F}</Project>
-      <Name>AnagramHelper.Search</Name>
+      <Name>QStreetSearch.Search</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AnagramHelper.Parser\AnagramHelper.Parser.csproj">
+    <ProjectReference Include="..\QStreetSearch.Parser\QStreetSearch.Parser.csproj">
       <Project>{341a7270-f4d2-49d7-a766-1de2f434164f}</Project>
-      <Name>AnagramHelper.Parser</Name>
+      <Name>QStreetSearch.Parser</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\data\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
     Other similar extension points exist, see Microsoft.Common.targets.

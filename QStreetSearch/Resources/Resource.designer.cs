@@ -9,9 +9,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: global::Android.Runtime.ResourceDesignerAttribute("AnagramHelper.Resource", IsApplication=true)]
+[assembly: global::Android.Runtime.ResourceDesignerAttribute("QStreetSearch.Resource", IsApplication=true)]
 
-namespace AnagramHelper
+namespace QStreetSearch
 {
 	
 	

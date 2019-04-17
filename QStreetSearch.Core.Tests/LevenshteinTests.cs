@@ -1,8 +1,6 @@
-using System;
-using AnagramHelper.Search;
 using Xunit;
 
-namespace AnagramHelper.Core.Tests
+namespace QStreetSearch.Search.Tests
 {
     public class LevenshteinTests
     {

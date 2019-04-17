@@ -1,7 +1,6 @@
-﻿using System;
-using Xunit;
+﻿using Xunit;
 
-namespace AnagramHelper.Parser.Tests
+namespace QStreetSearch.Parser.Tests
 {
     public class StreetTests
     {

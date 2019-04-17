@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AnagramHelper.Parser\AnagramHelper.Parser.csproj" />
+    <ProjectReference Include="..\QStreetSearch.Parser\QStreetSearch.Parser.csproj" />
   </ItemGroup>
 
 </Project>

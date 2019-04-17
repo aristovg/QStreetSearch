@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AnagramHelper.Parser
+namespace QStreetSearch.Parser
 {
     public class Street
     {

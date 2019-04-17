@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AnagramHelper.Search
+namespace QStreetSearch.Search
 {
     public class WordSet<T>
     {

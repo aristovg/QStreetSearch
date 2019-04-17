@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AnagramHelper.Search
+namespace QStreetSearch.Search
 {
     public class Levenshtein
     {

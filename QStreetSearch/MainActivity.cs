@@ -1,14 +1,14 @@
 ﻿using System.Linq;
-using AnagramHelper.Parser;
-using AnagramHelper.Search;
 using Android.App;
 using Android.OS;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Views.InputMethods;
 using Android.Widget;
+using QStreetSearch.Parser;
+using QStreetSearch.Search;
 
-namespace AnagramHelper
+namespace QStreetSearch
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity

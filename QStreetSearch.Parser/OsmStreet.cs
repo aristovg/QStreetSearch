@@ -1,4 +1,4 @@
-﻿namespace AnagramHelper.Parser
+﻿namespace QStreetSearch.Parser
 {
     internal class OsmStreet
     {

@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnagramHelper", "AnagramHelper\AnagramHelper.csproj", "{3BC0AC7E-3B3B-4D3F-9CC0-B2BDECC460A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QStreetSearch", "QStreetSearch\QStreetSearch.csproj", "{3BC0AC7E-3B3B-4D3F-9CC0-B2BDECC460A6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnagramHelper.Search", "AnagramHelper.Core\AnagramHelper.Search.csproj", "{C5151B6B-B03A-44B1-A829-6BE4CC60A86F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QStreetSearch.Search", "QStreetSearch.Core\QStreetSearch.Search.csproj", "{C5151B6B-B03A-44B1-A829-6BE4CC60A86F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnagramHelper.Search.Tests", "AnagramHelper.Core.Tests\AnagramHelper.Search.Tests.csproj", "{878F65A8-2FE2-4615-85B6-D0BE8417D81E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QStreetSearch.Search.Tests", "QStreetSearch.Core.Tests\QStreetSearch.Search.Tests.csproj", "{878F65A8-2FE2-4615-85B6-D0BE8417D81E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnagramHelper.Parser", "AnagramHelper.Parser\AnagramHelper.Parser.csproj", "{341A7270-F4D2-49D7-A766-1DE2F434164F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QStreetSearch.Parser", "QStreetSearch.Parser\QStreetSearch.Parser.csproj", "{341A7270-F4D2-49D7-A766-1DE2F434164F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnagramHelper.Parser.Tests", "AnagramHelper.Parser.Tests\AnagramHelper.Parser.Tests.csproj", "{E84259D3-7245-48F2-816E-8CA3D4AF7418}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QStreetSearch.Parser.Tests", "QStreetSearch.Parser.Tests\QStreetSearch.Parser.Tests.csproj", "{E84259D3-7245-48F2-816E-8CA3D4AF7418}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

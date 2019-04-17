@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace AnagramHelper.Search.Tests
+namespace QStreetSearch.Search.Tests
 {
     public class WordSetTests
     {

@@ -1,30 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace QStreetSearch.Search
 {
     public class DistanceSearch<T>
     {
-        private readonly Dictionary<ComparisonKey, T> _wordSet = new Dictionary<ComparisonKey, T>();
+        private readonly Dictionary<ComparisonKey, T> _wordSet;
 
         public DistanceSearch(IEnumerable<T> items, IEnumerable<ComparisonKeySelector<T>> comparisonKeySelectors)
         {
-            foreach (var item in items)
-            {
-                foreach (var comparisonKeySelector in comparisonKeySelectors)
-                {
-                    var key = comparisonKeySelector.SelectorFunc(item);
-
-                    if (string.IsNullOrEmpty(key)) continue;
-
-                    string normalizedKey = key.ToLower();
-                    var comparisonKey = new ComparisonKey(comparisonKeySelector.Id, normalizedKey);
-                    if (!_wordSet.ContainsKey(comparisonKey))
-                    {
-                        _wordSet.Add(comparisonKey, item);
-                    }
-                }
-            }
+            _wordSet = InitializationHelpers.InitializeWithLowercaseKeys(items, comparisonKeySelectors);
         }
 
         public DistanceSearch(IEnumerable<T> items, ComparisonKeySelector<T> comparisonKeySelectorSelector)
@@ -35,6 +21,8 @@ namespace QStreetSearch.Search
 
         public List<DistanceSearchResult<T>> FindByDistance(string key, int distanceLimit = int.MaxValue)
         {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+
             var normalizedKey = key.ToLower();
 
             List<DistanceSearchResult<T>> wordsByDistance = new List<DistanceSearchResult<T>>();
@@ -45,7 +33,7 @@ namespace QStreetSearch.Search
 
                 if (distance < distanceLimit)
                 {
-                    wordsByDistance.Add(new DistanceSearchResult<T>(distance, knownKey.Id, _wordSet[knownKey]);
+                    wordsByDistance.Add(new DistanceSearchResult<T>(distance, knownKey.Id, _wordSet[knownKey]));
                 }
             }
 

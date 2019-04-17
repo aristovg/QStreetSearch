@@ -1,14 +1,16 @@
-﻿using Xunit;
+﻿using System;
+using Xunit;
 
 namespace QStreetSearch.Search.Tests
 {
-    public class WordSetTests
+    public class AnagramDistanceSearchTests
     {
         private readonly AnagramDistanceSearch<string> _anagramDistanceSearch;
 
-        public WordSetTests()
+        public AnagramDistanceSearchTests()
         {
-            _anagramDistanceSearch = new AnagramDistanceSearch<string>(new[] {"kyiv", "kharkiv", "odessa", "krakiv"}, new ComparisonKeySelector<string>("Default", x => x));
+            _anagramDistanceSearch = new AnagramDistanceSearch<string>(new[] {"kyiv", "kharkiv", "odessa", "krakiv"}, 
+                new ComparisonKeySelector<string>("Default", x => x));
         }
 
         [Theory]
@@ -46,6 +48,12 @@ namespace QStreetSearch.Search.Tests
             Assert.Equal("kharkiv", result[1].Item);
             Assert.Equal("kyiv", result[2].Item);
             Assert.Equal("odessa", result[3].Item);
+        }
+
+        [Fact]
+        public void ShouldThrowOnNullKey()
+        {
+            Assert.Throws<ArgumentNullException>(() => _anagramDistanceSearch.FindByDistance(null));
         }
     }
 }

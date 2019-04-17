@@ -12,7 +12,7 @@ namespace QStreetSearch.Search.Tests
         [InlineData("a", "aa", 1)]
         [InlineData("ab", "aa", 1)]
         [InlineData("abcd", "aa", 3)]
-        [InlineData("mart", "karma", 5)]
+        [InlineData("mart", "karma", 3)]
         [InlineData("isle", "kisle", 1)]
         [InlineData("intention", "execution", 5)]
         public void FindsCorrectDistance(string first, string second, int expected)

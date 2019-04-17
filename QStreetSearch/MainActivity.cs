@@ -24,6 +24,7 @@ namespace QStreetSearch
         private Lazy<AnagramDistanceSearch<Street>> _anagramDistanceSearch;
         private Lazy<SimpleContainsSearch<Street>> _containsSearch;
         private Lazy<DistanceSearch<Street>> _distanceSearch;
+        private Lazy<PatternSearch<Street>> _patternSearch;
 
         private Dictionary<string, Func<string, IEnumerable<SearchResult<Street>>>> _searchStrategies;
 
@@ -50,6 +51,7 @@ namespace QStreetSearch
             _anagramDistanceSearch = new Lazy<AnagramDistanceSearch<Street>>(() => new AnagramDistanceSearch<Street>(parsedStreets, comparisonKeys));
             _containsSearch = new Lazy<SimpleContainsSearch<Street>>(() => new SimpleContainsSearch<Street>(parsedStreets, comparisonKeys));
             _distanceSearch = new Lazy<DistanceSearch<Street>>(() => new DistanceSearch<Street>(parsedStreets, comparisonKeys));
+            _patternSearch = new Lazy<PatternSearch<Street>>(() => new PatternSearch<Street>(parsedStreets, comparisonKeys));
 
             SetupSearchMethodSpinner();
             SetupSearchEditText();
@@ -100,7 +102,7 @@ namespace QStreetSearch
                 [Resources.GetString(Resource.String.method_contains)] = s => _containsSearch.Value.FindByContainsSequence(s),
                 [Resources.GetString(Resource.String.method_anagramdistance)] = s => _anagramDistanceSearch.Value.FindByDistance(s),
                 [Resources.GetString(Resource.String.method_distance)] = s => _distanceSearch.Value.FindByDistance(s),
-                [Resources.GetString(Resource.String.method_pattern)] = s => _containsSearch.Value.FindByContainsSequence(s),
+                [Resources.GetString(Resource.String.method_pattern)] = s => _patternSearch.Value.FindByPattern(s)
             };
         }
 

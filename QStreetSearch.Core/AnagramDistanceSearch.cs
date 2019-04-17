@@ -41,6 +41,8 @@ namespace QStreetSearch.Search
 
         public List<DistanceSearchResult<T>> FindByDistance(string key, int distanceLimit = int.MaxValue)
         {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+
             var sortedKey = AlphabetSort(key);
 
             List<DistanceSearchResult<T>> wordsByDistance = new List<DistanceSearchResult<T>>();

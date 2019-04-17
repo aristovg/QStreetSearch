@@ -5,10 +5,13 @@ namespace QStreetSearch.Parser
 {
     internal class KnownStreetTypes
     {
-        public static KnownStreetTypes Ua = new KnownStreetTypes("вулиця", "проспект", "провулок", "міст", "площа", "узвіз", "бульвар", "набережна", "шосе", "проїзд", "дорога", "алея");
-        public static KnownStreetTypes Ru = new KnownStreetTypes("улица", "проспект", "переулок", "мост", "площадь", "спуск", "бульвар", "набережная", "шоссе", "проезд", "дорога", "аллея");
+        public static KnownStreetTypes Ua = new KnownStreetTypes("вулиця", "проспект", "провулок", "міст", "площа", "узвіз", "бульвар", "набережна", "шосе", "проїзд",
+            "дорога", "алея");
 
-        private readonly List<string> _knownTypes; 
+        public static KnownStreetTypes Ru = new KnownStreetTypes("улица", "проспект", "переулок", "мост", "площадь", "спуск", "бульвар", "набережная", "шоссе", "проезд",
+            "дорога", "аллея");
+
+        private readonly List<string> _knownTypes;
 
         private KnownStreetTypes(params string[] types)
         {

@@ -1,34 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace QStreetSearch.Search
 {
     public class SimpleContainsSearch<T> 
     {
-        private readonly Dictionary<ComparisonKey, T> _wordSet = new Dictionary<ComparisonKey, T>();
+        private readonly Dictionary<ComparisonKey, T> _wordSet;
 
-        public SimpleContainsSearch(IEnumerable<T> data, IEnumerable<ComparisonKeySelector<T>> comparisonSelectors)
+        public SimpleContainsSearch(IEnumerable<T> items, IEnumerable<ComparisonKeySelector<T>> comparisonKeySelectors)
         {
-            foreach (var item in data)
-            {
-                foreach (var selector in comparisonSelectors)
-                {
-                    var key = selector.SelectorFunc(item);
+            _wordSet = InitializationHelpers.InitializeWithLowercaseKeys(items, comparisonKeySelectors);
 
-                    if (string.IsNullOrWhiteSpace(key)) continue;
-
-                    var normalizedKey = key.ToLowerInvariant();
-
-                    var comparisonKey = new ComparisonKey(selector.Id, normalizedKey);
-                    if (!_wordSet.ContainsKey(comparisonKey))
-                    {
-                        _wordSet.Add(comparisonKey, item);
-                    }
-                }
-            }
         }
 
         public List<SearchResult<T>> FindByContainsSequence(string sequence)
         {
+            if (sequence == null) throw new ArgumentNullException(nameof(sequence));
+
             var normalizedSequence = sequence.ToLower();
 
             List<SearchResult<T>> searchResult = new List<SearchResult<T>>();

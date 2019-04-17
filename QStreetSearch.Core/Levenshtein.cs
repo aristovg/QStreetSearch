@@ -2,7 +2,7 @@
 
 namespace QStreetSearch.Search
 {
-    public class Levenshtein
+    internal class Levenshtein
     {
         public static int Calculate(string first, string second)
         {

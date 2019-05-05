@@ -10,22 +10,37 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-		<Spinner
-			android:id="@+id/spinnerDataSet"
-			android:layout_width="fill_parent"
+		<TextView 
+			android:id="@+id/textViewCoordinates"
+		    android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:prompt="@string/dataset_prompt"
-			android:textSize="24sp"
-			android:padding="10dp" />
+			android:padding="10dp"
+		/>
+		<LinearLayout 
+			android:orientation="horizontal" 
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:weightSum="100">
+				
+			<Spinner
+				android:id="@+id/spinnerDataSet"
+				android:layout_width="0dp" 
+				android:layout_weight="50" 
+				android:layout_height="wrap_content"
+				android:prompt="@string/dataset_prompt"
+				android:textSize="24sp"
+				android:padding="10dp" />
 
-    <Spinner
-      android:id="@+id/spinnerSearchMethod"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:prompt="@string/method_prompt"
-	  android:textSize="24sp"
-	  android:padding="10dp" />
+			<Spinner
+				android:id="@+id/spinnerSearchMethod"
+				android:layout_width="0dp" 
+				android:layout_weight="50" 
+				android:layout_height="wrap_content"
+				android:prompt="@string/method_prompt"
+				android:textSize="24sp"
+				android:padding="10dp" />
 
+		</LinearLayout>
     <EditText
       android:id="@+id/editTextQuery"
       android:layout_width="match_parent"

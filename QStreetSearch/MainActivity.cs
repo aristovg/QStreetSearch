@@ -2,20 +2,30 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Android;
 using Android.App;
+using Android.Content.PM;
+using Android.Gms.Common;
 using Android.OS;
 using Android.Support.V7.App;
+using Android.Util;
 using Android.Views;
 using Android.Views.InputMethods;
 using Android.Widget;
 using QStreetSearch.Parser;
 using QStreetSearch.Search;
+using Android.Gms.Location;
+using Android.Locations;
+using Android.Support.V4.App;
 
 namespace QStreetSearch
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
+        private static readonly int RC_LAST_LOCATION_PERMISSION_CHECK = 1000;
+        private static readonly int RC_LOCATION_UPDATES_PERMISSION_CHECK = 1100;
+
         private const string CurrentNameKey = "Current";
         private const string OldNameKey = "Old";
 
@@ -38,12 +48,31 @@ namespace QStreetSearch
             new ComparisonKeySelector<GeoObject>(OldNameKey, x => x.OldName)
         };
 
+        private FusedLocationProviderClient _fusedLocationProviderClient;
+        private TextView _locationTextView;
+        private LocationRequest _locationRequest;
+
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
 
+
             Window.RequestFeature(WindowFeatures.NoTitle);
             SetContentView(Resource.Layout.activity_main);
+
+            if (IsGooglePlayServicesInstalled())
+            {
+                _fusedLocationProviderClient = LocationServices.GetFusedLocationProviderClient(this);
+                _locationTextView = FindViewById<TextView>(Resource.Id.textViewCoordinates);
+
+                _locationRequest = new LocationRequest()
+                    .SetPriority(LocationRequest.PriorityHighAccuracy)
+                    .SetInterval(5 * 1000)
+                    .SetFastestInterval(5 * 1000);
+
+                ActivityCompat.RequestPermissions(this, new[] { Manifest.Permission.AccessFineLocation }, RC_LOCATION_UPDATES_PERMISSION_CHECK);
+            }
 
             InitializeDataSetFetchers();
 
@@ -54,6 +83,29 @@ namespace QStreetSearch
             SetupDataSetSpinner();
             SetupSearchMethodSpinner();
             SetupSearchEditText();
+        }
+
+        public override async void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        {
+            if (requestCode == RC_LAST_LOCATION_PERMISSION_CHECK || requestCode == RC_LOCATION_UPDATES_PERMISSION_CHECK)
+            {
+                if (grantResults.Length == 1 && grantResults[0] == Permission.Granted)
+                {
+                        await _fusedLocationProviderClient.RequestLocationUpdatesAsync(_locationRequest, new FusedLocationProviderCallback(this));
+                    
+                }
+                else
+                {
+                    Toast.MakeText(this, "Error receiving GPS permissions", ToastLength.Long);
+                    return;
+                }
+            }
+            else
+            {
+                Log.Debug("FusedLocationProviderSample", "Don't know how to handle requestCode " + requestCode);
+            }
+
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
         private void InitializeSearchAlgorithms()
@@ -196,6 +248,39 @@ namespace QStreetSearch
             }
 
             return base.OnOptionsItemSelected(item);
+        }
+
+        private bool IsGooglePlayServicesInstalled()
+        {
+            var queryResult = GoogleApiAvailability.Instance.IsGooglePlayServicesAvailable(this);
+            if (queryResult == ConnectionResult.Success)
+            {
+                Toast.MakeText(this, "Google Play Services is installed on this device.", ToastLength.Long);
+                return true;
+            }
+
+            if (GoogleApiAvailability.Instance.IsUserResolvableError(queryResult))
+            {
+                // Check if there is a way the user can resolve the issue
+                var errorString = GoogleApiAvailability.Instance.GetErrorString(queryResult);
+
+                Toast.MakeText(this, "Google Play Services is NOT installed on this device.", ToastLength.Long);
+
+                Log.Error("MainActivity", "There is a problem with Google Play Services on this device: {0} - {1}",
+                    queryResult, errorString);
+            }
+
+            return false;
+        }
+
+        public void TriggerLocationUnavailable()
+        {
+            Toast.MakeText(this, "Location is unavailable", ToastLength.Long);
+        }
+
+        public void UpdateLocation(Location location)
+        {
+            _locationTextView.SetText($"{location.Latitude} {location.Longitude}", TextView.BufferType.Normal);
         }
     }
 }

@@ -27,14 +27,14 @@ namespace QStreetSearch.Parser
                 throw new InvalidOperationException($"Unknown language {geoObject.Language.ToString()}");
             }
 
-            (Name, Type) = TrimStreetType(geoObject.FullName);
+            (Name, Type) = TrimStreetType(geoObject.StreetName.FullName);
 
-            if (!string.IsNullOrWhiteSpace(geoObject.FullOldName))
+            if (!string.IsNullOrWhiteSpace(geoObject.StreetName.FullOldName))
             {
-                (OldName, OldType) = TrimStreetType(geoObject.FullOldName);
+                (OldName, OldType) = TrimStreetType(geoObject.StreetName.FullOldName);
             }
 
-            Suburb = geoObject.Suburb;
+            Suburb = geoObject.ParentDistrict;
         }
 
 

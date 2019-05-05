@@ -2,18 +2,64 @@
 
 namespace QStreetSearch.Parser
 {
-    internal class LocalizedOsmGeoObject
+    internal class GeoNode
+    {
+        public double Latitude { get; }
+        public double Longitude { get; }
+
+        public GeoNode(double latitude, double longitude)
+        {
+            Latitude = latitude;
+            Longitude = longitude;
+        }
+    }
+
+
+    internal class StreetName
     {
         public string FullName { get; }
         public string FullOldName { get; }
-        public string Suburb { get; }
-        public Language Language { get; }
 
-        public LocalizedOsmGeoObject(Language language, string fullName, string fullOldName = null, string suburb = null)
+        public StreetName(string fullName, string fullOldName = null)
         {
             FullName = fullName.ToLower();
             FullOldName = fullOldName?.ToLower();
-            Suburb = suburb?.ToLower();
+        }
+
+        protected bool Equals(StreetName other)
+        {
+            return string.Equals(FullName, other.FullName) && string.Equals(FullOldName, other.FullOldName);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((StreetName) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((FullName != null ? FullName.GetHashCode() : 0) * 397) ^ (FullOldName != null ? FullOldName.GetHashCode() : 0);
+            }
+        }
+    }
+
+    internal class LocalizedOsmGeoObject
+    {
+        public StreetName StreetName { get; }
+        public string ParentDistrict { get; }
+        public IEnumerable<GeoNode> GeoNodes { get; }
+        public Language Language { get; }
+
+        public LocalizedOsmGeoObject(Language language, StreetName streetName, IEnumerable<GeoNode> geoNodes = null, string suburb = null)
+        {
+            StreetName = streetName;
+            ParentDistrict = suburb?.ToLower();
+            GeoNodes = geoNodes;
             Language = language;
         }
 
@@ -25,21 +71,20 @@ namespace QStreetSearch.Parser
                 if (ReferenceEquals(x, null)) return false;
                 if (ReferenceEquals(y, null)) return false;
                 if (x.GetType() != y.GetType()) return false;
-                return string.Equals(x.FullName, y.FullName) && string.Equals(x.FullOldName, y.FullOldName) && string.Equals(x.Suburb, y.Suburb);
+                return string.Equals(x.StreetName, y.StreetName) && string.Equals(x.ParentDistrict, y.ParentDistrict);
             }
 
             public int GetHashCode(LocalizedOsmGeoObject obj)
             {
                 unchecked
                 {
-                    var hashCode = (obj.FullName != null ? obj.FullName.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (obj.FullOldName != null ? obj.FullOldName.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (obj.Suburb != null ? obj.Suburb.GetHashCode() : 0);
+                    var hashCode = (obj.StreetName != null ? obj.StreetName.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (obj.ParentDistrict != null ? obj.ParentDistrict.GetHashCode() : 0);
                     return hashCode;
                 }
             }
         }
 
-        public static IEqualityComparer<LocalizedOsmGeoObject> FullNameFullOldNameSuburbComparer { get; } = new FullNameFullOldNameSuburbEqualityComparer();
+        public static IEqualityComparer<LocalizedOsmGeoObject> FullNameFullOldNameSuburbComparer { get; } = new LocalizedOsmGeoObject.FullNameFullOldNameSuburbEqualityComparer();
     }
 }

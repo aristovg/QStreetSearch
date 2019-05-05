@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "OsmFilterOutputConverter": {
+      "commandName": "Project",
+      "commandLineArgs": "-i \"C:\\osmosos\\output.xml\" -o \"C:\\osmosos\\kyiv.json\" "
+    }
+  }
+}

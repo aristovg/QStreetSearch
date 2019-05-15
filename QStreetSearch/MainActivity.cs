@@ -15,14 +15,28 @@ using Android.Widget;
 using QStreetSearch.Parser;
 using QStreetSearch.Search;
 using Android.Gms.Location;
-using Android.Locations;
 using Android.Support.V4.App;
+using QStreetSearch.Location;
+using Environment = System.Environment;
 
 namespace QStreetSearch
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
+        private class SearchStrategy
+        {
+            public Func<string, IEnumerable<SearchResult<GeoObject>>> SearchFunc { get; }
+
+            public bool Ordered { get; }
+
+            public SearchStrategy(Func<string, IEnumerable<SearchResult<GeoObject>>> searchFunc, bool ordered = false)
+            {
+                SearchFunc = searchFunc;
+                Ordered = ordered;
+            }
+        }
+
         private static readonly int RC_LAST_LOCATION_PERMISSION_CHECK = 1000;
         private static readonly int RC_LOCATION_UPDATES_PERMISSION_CHECK = 1100;
 
@@ -36,10 +50,10 @@ namespace QStreetSearch
         private Lazy<DistanceSearch<GeoObject>> _distanceSearch;
         private Lazy<PatternSearch<GeoObject>> _patternSearch;
 
-        private Dictionary<string, Func<string, IEnumerable<SearchResult<GeoObject>>>> _searchStrategies;
+        private Dictionary<string, SearchStrategy> _searchStrategies;
         private Dictionary<string, Func<List<GeoObject>>> _dataSetsFetchers;
 
-        private Func<string, IEnumerable<SearchResult<GeoObject>>> _selectedSearchStrategy;
+        private SearchStrategy _selectedSearchStrategy;
         private List<GeoObject> _workingDataSet;
 
         private readonly ComparisonKeySelector<GeoObject>[] _comparisonKeys = new[]
@@ -51,6 +65,8 @@ namespace QStreetSearch
         private FusedLocationProviderClient _fusedLocationProviderClient;
         private TextView _locationTextView;
         private LocationRequest _locationRequest;
+
+        private Android.Locations.Location _currentLocation;
 
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -137,12 +153,16 @@ namespace QStreetSearch
 
         private void InitializeSearchStrategies()
         {
-            _searchStrategies = new Dictionary<string, Func<string, IEnumerable<SearchResult<GeoObject>>>>()
+            _searchStrategies = new Dictionary<string, SearchStrategy>()
             {
-                [Resources.GetString(Resource.String.method_contains)] = s => _containsSearch.Value.FindByContainsSequence(s),
-                [Resources.GetString(Resource.String.method_anagramdistance)] = s => _anagramDistanceSearch.Value.FindByDistance(s),
-                [Resources.GetString(Resource.String.method_distance)] = s => _distanceSearch.Value.FindByDistance(s),
-                [Resources.GetString(Resource.String.method_pattern)] = s => _patternSearch.Value.FindByPattern(s)
+                [Resources.GetString(Resource.String.method_contains)] =
+                    new SearchStrategy(s => _containsSearch.Value.FindByContainsSequence(s)),
+                [Resources.GetString(Resource.String.method_anagramdistance)] =
+                    new SearchStrategy(s => _anagramDistanceSearch.Value.FindByDistance(s), true),
+                [Resources.GetString(Resource.String.method_distance)] =
+                    new SearchStrategy(s => _distanceSearch.Value.FindByDistance(s)),
+                [Resources.GetString(Resource.String.method_pattern)] =
+                    new SearchStrategy(s => _patternSearch.Value.FindByPattern(s))
             };
         }
 
@@ -157,12 +177,25 @@ namespace QStreetSearch
                 {
                     string text = editTextQuery.Text;
 
-                    string cleared = new string(text.Where(char.IsLetterOrDigit).ToArray());
+                    string clearedText = new string(text.Where(char.IsLetterOrDigit).ToArray());
 
-                    var results = _selectedSearchStrategy(cleared).Take(DefaultItemsCount).Select(FormatListViewItem).ToList();
+                    var results = _selectedSearchStrategy.SearchFunc(clearedText)
+                        .Take(DefaultItemsCount)
+                        .Select(searchResult => new
+                        {
+                            SearchResult = searchResult,
+                            Distance = _currentLocation?.GetDistanceTo(searchResult.Item.GeoNodes)
+                        });
+                        
+                    if (_currentLocation != null && !_selectedSearchStrategy.Ordered)
+                    {
+                        results = results.OrderBy(x => x.Distance.Min);
+                    }
+
+                    var formattedResults = results.Select(x => FormatListViewItem(x.SearchResult, x.Distance)).ToList();
 
                     ListView listView = FindViewById<ListView>(Resource.Id.listViewResults);
-                    listView.Adapter = new ArrayAdapter(this, Android.Resource.Layout.SimpleListItem1, results);
+                    listView.Adapter = new ArrayAdapter(this, Android.Resource.Layout.SimpleListItem1, formattedResults);
 
                     e.Handled = true;
                 }
@@ -202,7 +235,7 @@ namespace QStreetSearch
             spinner.Adapter = adapter;
         }
 
-        private static string FormatListViewItem(SearchResult<GeoObject> searchResult)
+        private static string FormatListViewItem(SearchResult<GeoObject> searchResult, DistanceToObject distanceToObject)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -221,13 +254,20 @@ namespace QStreetSearch
 
             if (!string.IsNullOrEmpty(searchResult.Item.OldName))
             {
-                sb.Append(System.Environment.NewLine);
+                sb.Append(Environment.NewLine);
                 sb.Append($"Old: {searchResult.Item.OldName} [{searchResult.Item.OldType}]");
 
                 if (distanceSearch != null && searchResult.KeyId == OldNameKey)
                 {
                     sb.Append($" (word dist: {distanceSearch.Distance})");
                 }
+            }
+
+            if (distanceToObject != null && !distanceToObject.IsEmpty)
+            {
+                string Format(float f) => (f / 1000).ToString("F1");
+                sb.Append(Environment.NewLine);
+                sb.Append($"{Format(distanceToObject.Min)} - {Format(distanceToObject.Max)} (Avg: {Format(distanceToObject.Avg)}) (km)");
             }
 
             return sb.ToString();
@@ -278,8 +318,9 @@ namespace QStreetSearch
             Toast.MakeText(this, "Location is unavailable", ToastLength.Long);
         }
 
-        public void UpdateLocation(Location location)
+        public void UpdateLocation(Android.Locations.Location location)
         {
+            _currentLocation = location;
             _locationTextView.SetText($"{location.Latitude} {location.Longitude}", TextView.BufferType.Normal);
         }
     }

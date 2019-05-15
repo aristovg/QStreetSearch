@@ -1,20 +1,8 @@
 ﻿using System.Collections.Generic;
+using QStreetSearch.Contracts;
 
 namespace QStreetSearch.Parser
 {
-    internal class GeoNode
-    {
-        public double Latitude { get; }
-        public double Longitude { get; }
-
-        public GeoNode(double latitude, double longitude)
-        {
-            Latitude = latitude;
-            Longitude = longitude;
-        }
-    }
-
-
     internal class StreetName
     {
         public string FullName { get; }

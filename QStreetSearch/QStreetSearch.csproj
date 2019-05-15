@@ -115,9 +115,17 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\QStreetSearch.Contracts\QStreetSearch.Contracts.csproj">
+      <Project>{c8d31391-5fa5-47b6-a264-a8bb6fd2c8b7}</Project>
+      <Name>QStreetSearch.Contracts</Name>
+    </ProjectReference>
     <ProjectReference Include="..\QStreetSearch.Core\QStreetSearch.Search.csproj">
       <Project>{C5151B6B-B03A-44B1-A829-6BE4CC60A86F}</Project>
       <Name>QStreetSearch.Search</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\QStreetSearch.Location\QStreetSearch.Location.csproj">
+      <Project>{d69b629e-bebc-45f3-89ef-fd6e7deb6e43}</Project>
+      <Name>QStreetSearch.Location</Name>
     </ProjectReference>
     <ProjectReference Include="..\QStreetSearch.Parser\QStreetSearch.Parser.csproj">
       <Project>{341a7270-f4d2-49d7-a766-1de2f434164f}</Project>

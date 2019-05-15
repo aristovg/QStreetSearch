@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using QStreetSearch.Contracts;
 
 namespace QStreetSearch.Parser
 {
@@ -11,6 +12,7 @@ namespace QStreetSearch.Parser
         public string Type { get; }
         public string OldType { get; }
         public string Suburb { get; }
+        public IEnumerable<GeoNode> GeoNodes { get; }
 
         private static readonly Dictionary<Language, KnownStreetTypes> TypesByLanguage = new Dictionary<Language, KnownStreetTypes>()
         {
@@ -35,6 +37,7 @@ namespace QStreetSearch.Parser
             }
 
             Suburb = geoObject.ParentDistrict;
+            GeoNodes = geoObject.GeoNodes;
         }
 
 

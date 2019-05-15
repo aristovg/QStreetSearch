@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace QStreetSearch.Contracts
 {
-    public class GeoNode
+    public class OsmGeoNode
     {
         [JsonIgnore]
         public string Id { get; set; }
@@ -23,6 +23,6 @@ namespace QStreetSearch.Contracts
 
         public string ParentDistrict { get; set; }
 
-        public List<GeoNode> Nodes { get; set; }
+        public List<OsmGeoNode> Nodes { get; set; }
     }
 }

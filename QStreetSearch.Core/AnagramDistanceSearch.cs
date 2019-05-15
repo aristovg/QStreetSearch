@@ -52,6 +52,13 @@ namespace QStreetSearch.Search
 
                 if (distance < distanceLimit)
                 {
+                    var words = _wordSet[knownKey];
+
+                    if (words.Count > 1)
+                    {
+
+                    }
+
                     wordsByDistance.AddRange(_wordSet[knownKey].Select(item => new DistanceSearchResult<T>(distance, knownKey.Id, item)));
                 }
             }

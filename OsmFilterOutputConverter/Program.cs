@@ -48,7 +48,7 @@ namespace OsmFilterOutputConverter
                 var root = await XElement.LoadAsync(fs, LoadOptions.None, CancellationToken.None);
 
                 var nodes = (from node in root.Descendants("node")
-                    select new GeoNode()
+                    select new OsmGeoNode()
                     {
                         Id = (string) node.Attribute("id"),
                         Latitude = (double) node.Attribute("lat"),
@@ -90,9 +90,9 @@ namespace OsmFilterOutputConverter
             };
         }
 
-        private static List<GeoNode> GetGeoNodes(string fullName, Dictionary<string, GeoNode> nodes, List<string> nodeIds)
+        private static List<OsmGeoNode> GetGeoNodes(string fullName, Dictionary<string, OsmGeoNode> nodes, List<string> nodeIds)
         {
-            var list = new List<GeoNode>(nodeIds.Count);
+            var list = new List<OsmGeoNode>(nodeIds.Count);
 
             foreach (var id in nodeIds)
             {

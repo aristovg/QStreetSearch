@@ -39,6 +39,17 @@ namespace OsmFilterOutputConverter
             Console.ReadLine();
         }
 
+        public class OsmWay
+        {
+            public OsmName Name { get; set; }
+            public OsmName Ua { get; set; }
+            public OsmName Ru { get; set; }
+
+            public string ParentDistrict { get; set; }
+
+            public List<OsmGeoNode> Nodes { get; set; }
+        }
+
         static async Task ProcessFile(Options options)
         {
             _logger.LogInformation($"Input file {options.InputFile}");
@@ -60,13 +71,48 @@ namespace OsmFilterOutputConverter
                     let fullName = GetTagValue(way, "name")
                     where fullName != null
                     let wayNodes = (from nodeRef in way.Elements("nd") select (string) nodeRef.Attribute("ref")).ToList()
-                    select new OsmGeoObject
+                    select new OsmWay
                     {
+                        Name = GetOsmName(way),
                         Nodes = GetGeoNodes(fullName, nodes, wayNodes),
-                        Ua = GetOsmName(way, "ua"),
+                        Ua = GetOsmName(way, "uk"),
                         Ru = GetOsmName(way, "ru"),
                         ParentDistrict = GetTagValue(way, "addr:suburb")
                     };
+
+                var wayGroups = objects.GroupBy(x => new { x.Name.FullName, x.ParentDistrict });
+
+                var distinctGeoObjects = new List<OsmGeoObject>();
+
+                foreach (var wayGroup in wayGroups)
+                {
+                    string SelectMostFrequent(Func<OsmWay, string> selector)
+                    {
+                        return wayGroup.Select(selector)
+                            .GroupBy(x => x)
+                            .OrderByDescending(x => x.Count())
+                            .First()
+                            .Key;
+                    }
+
+                    var osmGeoObject = new OsmGeoObject
+                    {
+                        Nodes = wayGroup.SelectMany(x => x.Nodes).ToList(),
+                        Ua = new OsmName()
+                        {
+                            FullOldName = SelectMostFrequent(x => x.Ua.FullOldName),
+                            FullName = SelectMostFrequent(x => x.Ua.FullName)
+                        },
+                        Ru = new OsmName()
+                        {
+                            FullOldName = SelectMostFrequent(x => x.Ru.FullOldName),
+                            FullName = SelectMostFrequent(x => x.Ru.FullName)
+                        },
+                        ParentDistrict = wayGroup.Key.ParentDistrict
+                    };
+
+                    distinctGeoObjects.Add(osmGeoObject);
+                }
 
                 using (var sw = new StreamWriter(options.OutputFile))
                 {
@@ -76,12 +122,12 @@ namespace OsmFilterOutputConverter
                         ContractResolver = new CamelCasePropertyNamesContractResolver()
                     };
 
-                    serializer.Serialize(sw, objects);
+                    serializer.Serialize(sw, distinctGeoObjects);
                 }
             }
         }
 
-        private static OsmName GetOsmName(XElement way, string language)
+        private static OsmName GetOsmName(XElement way, string language = null)
         {
             return new OsmName
             {
@@ -114,8 +160,10 @@ namespace OsmFilterOutputConverter
             return list;
         }
 
-        private static string GetLocalizedName(XElement element, string tagKey, string language)
+        private static string GetLocalizedName(XElement element, string tagKey, string language = null)
         {
+            if (language == null) return GetTagValue(element, tagKey);
+
             var localizedTag = $"{tagKey}:{language}";
             var localizedValue = GetTagValue(element, localizedTag);
 

@@ -46,20 +46,15 @@ namespace QStreetSearch.Search
             var sortedKey = AlphabetSort(key);
 
             List<DistanceSearchResult<T>> wordsByDistance = new List<DistanceSearchResult<T>>();
-            foreach (var knownKey in _wordSet.Keys)
+            foreach (var comparisonKey in _wordSet.Keys)
             {
-                int distance = Levenshtein.Calculate(sortedKey, knownKey.Value);
+                int distance = Levenshtein.Calculate(sortedKey, comparisonKey.Value);
 
                 if (distance < distanceLimit)
                 {
-                    var words = _wordSet[knownKey];
+                    var results = _wordSet[comparisonKey].Select(item => new DistanceSearchResult<T>(distance, comparisonKey.Id, item));
 
-                    if (words.Count > 1)
-                    {
-
-                    }
-
-                    wordsByDistance.AddRange(_wordSet[knownKey].Select(item => new DistanceSearchResult<T>(distance, knownKey.Id, item)));
+                    wordsByDistance.AddRange(results);
                 }
             }
 

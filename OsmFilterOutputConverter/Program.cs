@@ -15,6 +15,19 @@ using QStreetSearch.Contracts;
 
 namespace OsmFilterOutputConverter
 {
+
+    [Verb("streets")]
+    class StreetOptions : Options
+    {
+
+    }
+
+    [Verb("places")]
+    class PlacesOptions : Options
+    {
+
+    }
+
     class Options
     {
         [Option('i', "input", Required = true, HelpText = "Input files to be processed.")]
@@ -34,7 +47,11 @@ namespace OsmFilterOutputConverter
             var serviceProvider = new ServiceCollection().AddLogging(builder => builder.AddConsole()).BuildServiceProvider();
             _logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("default");
 
-            Parser.Default.ParseArguments<Options>(args).WithParsed(async opts => await ProcessFile(opts));
+            Parser.Default.ParseArguments<StreetOptions, PlacesOptions>(args)
+                .MapResult(
+                     async (StreetOptions opts) => await WriteStreets(opts),
+                     async (PlacesOptions opts) => await WritePlaces(opts),
+                    errs => Task.FromResult(1));
 
             Console.ReadLine();
         }
@@ -50,7 +67,17 @@ namespace OsmFilterOutputConverter
             public List<OsmGeoNode> Nodes { get; set; }
         }
 
-        static async Task ProcessFile(Options options)
+        static async Task WriteStreets(Options options)
+        {
+            await ProcessFile(options, ParseStreets);
+        }
+
+        static async Task WritePlaces(Options options)
+        {
+            await ProcessFile(options, ParsePlaces);
+        }
+
+        static async Task<int> ProcessFile(Options options, Func<XElement, IEnumerable<object>> parser)
         {
             _logger.LogInformation($"Input file {options.InputFile}");
 
@@ -58,61 +85,7 @@ namespace OsmFilterOutputConverter
             {
                 var root = await XElement.LoadAsync(fs, LoadOptions.None, CancellationToken.None);
 
-                var nodes = (from node in root.Descendants("node")
-                    select new OsmGeoNode()
-                    {
-                        Id = (string) node.Attribute("id"),
-                        Latitude = (double) node.Attribute("lat"),
-                        Longitude = (double) node.Attribute("lon")
-                    }).ToDictionary(x => x.Id, x => x);
-
-
-                var objects = from way in root.Descendants("way")
-                    let fullName = GetTagValue(way, "name")
-                    where fullName != null
-                    let wayNodes = (from nodeRef in way.Elements("nd") select (string) nodeRef.Attribute("ref")).ToList()
-                    select new OsmWay
-                    {
-                        Name = GetOsmName(way),
-                        Nodes = GetGeoNodes(fullName, nodes, wayNodes),
-                        Ua = GetOsmName(way, "uk"),
-                        Ru = GetOsmName(way, "ru"),
-                        ParentDistrict = GetTagValue(way, "addr:suburb")
-                    };
-
-                var wayGroups = objects.GroupBy(x => new { x.Name.FullName, x.ParentDistrict });
-
-                var distinctGeoObjects = new List<OsmGeoObject>();
-
-                foreach (var wayGroup in wayGroups)
-                {
-                    string SelectMostFrequent(Func<OsmWay, string> selector)
-                    {
-                        return wayGroup.Select(selector)
-                            .GroupBy(x => x)
-                            .OrderByDescending(x => x.Count())
-                            .First()
-                            .Key;
-                    }
-
-                    var osmGeoObject = new OsmGeoObject
-                    {
-                        Nodes = wayGroup.SelectMany(x => x.Nodes).ToList(),
-                        Ua = new OsmName()
-                        {
-                            FullOldName = SelectMostFrequent(x => x.Ua.FullOldName),
-                            FullName = SelectMostFrequent(x => x.Ua.FullName)
-                        },
-                        Ru = new OsmName()
-                        {
-                            FullOldName = SelectMostFrequent(x => x.Ru.FullOldName),
-                            FullName = SelectMostFrequent(x => x.Ru.FullName)
-                        },
-                        ParentDistrict = wayGroup.Key.ParentDistrict
-                    };
-
-                    distinctGeoObjects.Add(osmGeoObject);
-                }
+                var distinctGeoObjects = parser(root);
 
                 using (var sw = new StreamWriter(options.OutputFile))
                 {
@@ -125,14 +98,98 @@ namespace OsmFilterOutputConverter
                     serializer.Serialize(sw, distinctGeoObjects);
                 }
             }
+
+            return 0;
         }
 
-        private static OsmName GetOsmName(XElement way, string language = null)
+        private static List<OsmGeoObject> ParseStreets(XElement root)
+        {
+            var nodes = (from node in root.Descendants("node")
+                select new OsmGeoNode()
+                {
+                    Id = (string) node.Attribute("id"),
+                    Latitude = (double) node.Attribute("lat"),
+                    Longitude = (double) node.Attribute("lon")
+                }).ToDictionary(x => x.Id, x => x);
+
+
+            var objects = from way in root.Descendants("way")
+                let fullName = GetTagValue(way, "name")
+                where fullName != null
+                let wayNodes = (from nodeRef in way.Elements("nd") select (string) nodeRef.Attribute("ref")).ToList()
+                select new OsmWay
+                {
+                    Name = GetOsmName(way),
+                    Nodes = GetGeoNodes(fullName, nodes, wayNodes),
+                    Ua = GetOsmName(way, "uk"),
+                    Ru = GetOsmName(way, "ru"),
+                    ParentDistrict = GetTagValue(way, "addr:suburb")
+                };
+
+            var wayGroups = objects.GroupBy(x => new {x.Name.FullName, x.ParentDistrict});
+
+            var distinctGeoObjects = new List<OsmGeoObject>();
+
+            foreach (var wayGroup in wayGroups)
+            {
+                string SelectMostFrequent(Func<OsmWay, string> selector)
+                {
+                    return wayGroup.Select(selector)
+                        .GroupBy(x => x)
+                        .OrderByDescending(x => x.Count())
+                        .First()
+                        .Key;
+                }
+
+                var osmGeoObject = new OsmGeoObject
+                {
+                    Nodes = wayGroup.SelectMany(x => x.Nodes).ToList(),
+                    Ua = new OsmName()
+                    {
+                        FullOldName = SelectMostFrequent(x => x.Ua.FullOldName),
+                        FullName = SelectMostFrequent(x => x.Ua.FullName)
+                    },
+                    Ru = new OsmName()
+                    {
+                        FullOldName = SelectMostFrequent(x => x.Ru.FullOldName),
+                        FullName = SelectMostFrequent(x => x.Ru.FullName)
+                    },
+                    ParentDistrict = wayGroup.Key.ParentDistrict
+                };
+
+                distinctGeoObjects.Add(osmGeoObject);
+            }
+
+            return distinctGeoObjects;
+        }
+
+        private static IEnumerable<OsmGeoObject> ParsePlaces(XElement root)
+        {
+            var nodes = from node in root.Descendants("node")
+                select new OsmGeoObject()
+                {
+                    Ua = GetOsmName(node, "uk"),
+                    Ru = GetOsmName(node, "ru"),
+                    Nodes = new List<OsmGeoNode>()
+                    {
+                        new OsmGeoNode()
+                        {
+                            Latitude = (double) node.Attribute("lat"),
+                            Longitude = (double) node.Attribute("lon")
+                        }
+                    }
+
+                };
+
+            return nodes;
+        }
+
+        private static OsmName GetOsmName(XElement element, string language = null)
         {
             return new OsmName
             {
-                FullName = GetLocalizedName(way, "name", language),
-                FullOldName = GetLocalizedName(way, "old_name", language)
+                FullName = GetLocalizedName(element, "name", language),
+                FullOldName = GetLocalizedName(element, "old_name", language)
             };
         }
 

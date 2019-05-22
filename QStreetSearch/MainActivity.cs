@@ -136,9 +136,7 @@ namespace QStreetSearch
         {
             _dataSetsFetchers = new Dictionary<string, Func<List<GeoObject>>>()
             {
-                [Resources.GetString(Resource.String.dataset_kyiv_region_ru)] = () => DataSetFetcher("kyiv.json", Language.Ru),
-                [Resources.GetString(Resource.String.dataset_kyiv_region_ua)] = () => DataSetFetcher("kyiv.json", Language.Ua),
-                [Resources.GetString(Resource.String.dataset_kyiv_region_ru_ua)] = () => DataSetFetcher("kyiv.json", Language.Ru, Language.Ua),
+                [Resources.GetString(Resource.String.dataset_kyiv_region_ru_ua)] = () => DataSetFetcher("kyivregion.json", Language.Ru, Language.Ua),
                 [Resources.GetString(Resource.String.dataset_kyiv_street_ru)] = () => DataSetFetcher("kyiv.json", Language.Ru),
                 [Resources.GetString(Resource.String.dataset_kyiv_street_ua)] = () => DataSetFetcher("kyiv.json", Language.Ua),
                 [Resources.GetString(Resource.String.dataset_kyiv_street_ru_ua)] = () => DataSetFetcher("kyiv.json", Language.Ru, Language.Ua),

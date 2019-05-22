@@ -4999,13 +4999,7 @@ namespace QStreetSearch
 			public const int common_signin_button_text_long = 2131230736;
 			
 			// aapt resource value: 0x7f080044
-			public const int dataset_kyiv_region_ru = 2131230788;
-			
-			// aapt resource value: 0x7f080046
-			public const int dataset_kyiv_region_ru_ua = 2131230790;
-			
-			// aapt resource value: 0x7f080045
-			public const int dataset_kyiv_region_ua = 2131230789;
+			public const int dataset_kyiv_region_ru_ua = 2131230788;
 			
 			// aapt resource value: 0x7f080041
 			public const int dataset_kyiv_street_ru = 2131230785;

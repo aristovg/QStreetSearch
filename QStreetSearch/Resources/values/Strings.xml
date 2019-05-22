@@ -13,8 +13,6 @@
   <string name="dataset_kyiv_street_ua">Kyiv street UA</string>
   <string name="dataset_kyiv_street_ru_ua">Kyiv street RU+UA</string>
 
-  <string name="dataset_kyiv_region_ru">Kyiv region towns RU</string>
-  <string name="dataset_kyiv_region_ua">Kyiv region towns UA</string>
   <string name="dataset_kyiv_region_ru_ua">Kyiv region towns RU+UA</string>
 
   <string-array name="search_methods_array">
@@ -28,8 +26,6 @@
     <item>@string/dataset_kyiv_street_ru</item>
     <item>@string/dataset_kyiv_street_ua</item>
     <item>@string/dataset_kyiv_street_ru_ua</item>
-    <item>@string/dataset_kyiv_region_ru</item>
-    <item>@string/dataset_kyiv_region_ua</item>
     <item>@string/dataset_kyiv_region_ru_ua</item>
   </string-array>
 </resources>

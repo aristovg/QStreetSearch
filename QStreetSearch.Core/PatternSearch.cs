@@ -26,16 +26,16 @@ namespace QStreetSearch.Search
 
             var regexPattern = key.ToLower().Replace('?', '.').Replace("*", ".*");
 
-            var regex = new Regex(regexPattern);
+            var regex = new Regex($"^{regexPattern}$");
 
             List<SearchResult<T>> wordsByDistance = new List<SearchResult<T>>();
 
             foreach (var knownKey in _wordSet.Keys)
             {
                 if (regex.IsMatch(knownKey.Value))
-
-                wordsByDistance.Add(new SearchResult<T>(knownKey.Id, _wordSet[knownKey]));
-
+                {
+                    wordsByDistance.Add(new SearchResult<T>(knownKey.Id, _wordSet[knownKey]));
+                }
             }
 
             return wordsByDistance;

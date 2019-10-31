@@ -9,6 +9,7 @@
   <string name="method_distance">Word Distance</string>
 
   <string name="dataset_prompt">Data set</string>
+  <string name="dataset_ternopil">Ternopil</string>
   <string name="dataset_kyiv_street_ru">Kyiv street RU</string>
   <string name="dataset_kyiv_street_ua">Kyiv street UA</string>
   <string name="dataset_kyiv_street_ru_ua">Kyiv street RU+UA</string>
@@ -27,5 +28,6 @@
     <item>@string/dataset_kyiv_street_ua</item>
     <item>@string/dataset_kyiv_street_ru_ua</item>
     <item>@string/dataset_kyiv_region_ru_ua</item>
+    <item>@string/dataset_ternopil</item>
   </string-array>
 </resources>

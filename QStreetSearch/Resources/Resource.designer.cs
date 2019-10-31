@@ -4998,20 +4998,23 @@ namespace QStreetSearch
 			// aapt resource value: 0x7f080010
 			public const int common_signin_button_text_long = 2131230736;
 			
-			// aapt resource value: 0x7f080044
-			public const int dataset_kyiv_region_ru_ua = 2131230788;
-			
-			// aapt resource value: 0x7f080041
-			public const int dataset_kyiv_street_ru = 2131230785;
-			
-			// aapt resource value: 0x7f080043
-			public const int dataset_kyiv_street_ru_ua = 2131230787;
+			// aapt resource value: 0x7f080045
+			public const int dataset_kyiv_region_ru_ua = 2131230789;
 			
 			// aapt resource value: 0x7f080042
-			public const int dataset_kyiv_street_ua = 2131230786;
+			public const int dataset_kyiv_street_ru = 2131230786;
+			
+			// aapt resource value: 0x7f080044
+			public const int dataset_kyiv_street_ru_ua = 2131230788;
+			
+			// aapt resource value: 0x7f080043
+			public const int dataset_kyiv_street_ua = 2131230787;
 			
 			// aapt resource value: 0x7f080040
 			public const int dataset_prompt = 2131230784;
+			
+			// aapt resource value: 0x7f080041
+			public const int dataset_ternopil = 2131230785;
 			
 			// aapt resource value: 0x7f080038
 			public const int hello = 2131230776;

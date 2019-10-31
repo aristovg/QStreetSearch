@@ -136,6 +136,7 @@ namespace QStreetSearch
         {
             _dataSetsFetchers = new Dictionary<string, Func<List<GeoObject>>>()
             {
+                [Resources.GetString(Resource.String.dataset_ternopil)] = () => DataSetFetcher("outp.json", Language.Ru, Language.Ua),
                 [Resources.GetString(Resource.String.dataset_kyiv_region_ru_ua)] = () => DataSetFetcher("kyivregion.json", Language.Ru, Language.Ua),
                 [Resources.GetString(Resource.String.dataset_kyiv_street_ru)] = () => DataSetFetcher("kyiv.json", Language.Ru),
                 [Resources.GetString(Resource.String.dataset_kyiv_street_ua)] = () => DataSetFetcher("kyiv.json", Language.Ua),
@@ -175,7 +176,7 @@ namespace QStreetSearch
                 {
                     string text = editTextQuery.Text;
 
-                    string clearedText = new string(text.Where(char.IsLetterOrDigit).ToArray());
+                    string clearedText = new string(text.Where(c => char.IsLetterOrDigit(c) || c == '*' || c == '?').ToArray());
 
                     var results = _selectedSearchStrategy.SearchFunc(clearedText)
                         .Take(DefaultItemsCount)
@@ -184,7 +185,9 @@ namespace QStreetSearch
                             SearchResult = searchResult,
                             Distance = _currentLocation?.GetDistanceTo(searchResult.Item.GeoNodes)
                         });
-                        
+
+
+                    results = results.ToList();
                     if (_currentLocation != null && !_selectedSearchStrategy.Ordered)
                     {
                         results = results.OrderBy(x => x.Distance.Min);

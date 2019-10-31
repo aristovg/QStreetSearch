@@ -15,9 +15,9 @@ namespace QStreetSearch.Search.Tests
             });
 
         [Theory]
-        [InlineData("con*", 4)]
-        [InlineData("Con*", 4)]
-        [InlineData("CON*", 4)]
+        [InlineData("con*", 2)]
+        [InlineData("Con*", 2)]
+        [InlineData("CON*", 2)]
         [InlineData("*con*", 4)]
         [InlineData("*CON*", 4)]
         [InlineData("*Con*", 4)]
@@ -31,12 +31,21 @@ namespace QStreetSearch.Search.Tests
         [InlineData("*I*", 2)]
         [InlineData("*E", 2)]
         [InlineData("*e", 2)]
-        [InlineData("", 5)]
+        [InlineData("*", 5)]
         public void ShouldFindMatch(string term, int count)
         {
             var results = _search.FindByPattern(term);
 
             Assert.Equal(count, results.Count);
+        }
+
+        [Fact]
+        public void ShouldNotFindMatchIfNotStart()
+        {
+            var results = _search.FindByPattern("o*");
+
+            Assert.Empty(results);
+
         }
 
         [Fact]

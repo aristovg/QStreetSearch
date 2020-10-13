@@ -2,7 +2,7 @@
   "profiles": {
     "OsmFilterOutputConverter": {
       "commandName": "Project",
-      "commandLineArgs": "places -i \"C:\\osmosos\\kyivregion.xml\" -o \"C:\\osmosos\\kyivregion.json\" "
+      "commandLineArgs": "places -i \"F:\\osm\\west.xml\" -o \"F:\\osm\\west.json\" "
     }
   }
 }

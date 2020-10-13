@@ -99,6 +99,8 @@ namespace OsmFilterOutputConverter
                 }
             }
 
+            _logger.LogInformation($"Output file {options.OutputFile}. Done");
+
             return 0;
         }
 

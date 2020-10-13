@@ -67,7 +67,7 @@
   <ItemGroup>
     <AndroidAsset Include="Assets\kyiv.json" />
     <AndroidAsset Include="Assets\kyivregion.json" />
-    <AndroidAsset Include="Assets\outp.json" />
+    <AndroidAsset Include="Assets\west.json" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Properties\AndroidManifest.xml">
       <SubType>Designer</SubType>
